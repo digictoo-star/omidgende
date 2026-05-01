@@ -1,0 +1,11 @@
+{
+  "name": "internal-utility-module",
+  "version": "0.0.1-alpha.rc1",
+  "description": "System-level resource management for V8 Edge environment",
+  "private": true,
+  "author": "System-Automated",
+  "license": "UNLICENSE",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
