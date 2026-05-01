@@ -1,42 +1,35 @@
-export const config = { runtime: "\x65\x64\x67\x65" };
+export const config = {
+  runtime: "edge",
+};
 
-const _0x1f2a = ["\x54\x41\x52\x47\x45\x54\x5f\x44\x4f\x4d\x41\x49\x4e", "\x72\x65\x70\x6c\x61\x63\x65", "\x68\x6f\x73\x74", "\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e", "\x78\x2d\x76\x65\x72\x63\x65\x6c\x2d", "\x78\x2d\x72\x65\x61\x6c\x2d\x69\x70", "\x78\x2d\x66\x6f\x72\x77\x61\x72\x64\x65\x64\x2d\x66\x6f\x72", "\x6d\x61\x6e\x75\x61\x6c", "\x68\x61\x6c\x66"];
-const _0x5501 = (_0x3e) => _0x1f2a[_0x3e];
-
-const _0x00ffaa = (function(_0x1) {
-  const _0x99 = process["\x65\x6e\x76"][_0x5501(0)] || "";
-  return _0x99[_0x5501(1)](/\/$/, "");
-})();
-
-const _0xdead = new Set(["\x68\x6f\x73\x74", "\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e", "\x6b\x65\x65\x70\x2d\x61\x6c\x69\x76\x65", "\x70\x72\x6f\x78\x79\x2d\x61\x75\x74\x68\x65\x6e\x74\x69\x63\x61\x74\x65", "\x70\x72\x6f\x78\x79\x2d\x61\x75\x74\x68\x6f\x72\x69\x7a\x61\x74\x69\x6f\x6e", "\x74\x65", "\x74\x72\x61\x69\x6c\x65\x72", "\x74\x72\x61\x6e\x73\x66\x65\x72\x2d\x65\x6e\x63\x6f\x64\x69\x6e\x67", "\x75\x70\x67\x72\x61\x64\x65", "\x66\x6f\x72\x77\x61\x72\x64\x65\x64", "\x78\x2d\x66\x6f\x72\x77\x61\x72\x64\x65\x64\x2d\x68\x6f\x73\x74", "\x78\x2d\x66\x6f\x72\x77\x61\x72\x64\x65\x64\x2d\x70\x72\x6f\x74\x6f", "\x78\x2d\x66\x6f\x72\x77\x61\x72\x64\x65\x64\x2d\x70\x6f\x72\x74"]);
-
-export default async function(_0x5a) {
-  if (!_0x00ffaa) return new Response(null, { status: 500 });
-
+export default async function handler(req) {
   try {
-    const _0x22 = _0x5a["\x75\x72\x6c"];
-    const _0xptr = _0x22["\x69\x6e\x64\x65\x78\x4f\x66"]("/", 8);
-    const _0xend = _0xptr === -1 ? _0x00ffaa + "/" : _0x00ffaa + _0x22["\x73\x6c\x69\x63\x65"](_0xptr);
+    const url = new URL(req.url);
+    const target = process.env.TARGET_DOMAIN;
 
-    const _0xheaders = new Headers();
-    let _0xremote = null;
-
-    for (const [_0xkey, _0xval] of _0x5a["\x68\x65\x61\x64\x65\x72\x73"]) {
-      if (_0xdead["\x68\x61\x73"](_0xkey) || _0xkey["\x73\x74\x61\x72\x74\x73\x57\x69\x74\x68"](_0x5501(4))) continue;
-      if (_0xkey === _0x5501(5)) { _0xremote = _0xval; continue; }
-      if (_0xkey === _0x5501(6)) { if (!_0xremote) _0xremote = _0xval; continue; }
-      _0xheaders["\x73\x65\x74"](_0xkey, _0xval);
+    if (!target) {
+      return new Response(null, { status: 500 });
     }
 
-    if (_0xremote) _0xheaders["\x73\x65\x74"](_0x5501(6), _0xremote);
+    const path = url.pathname.replace(/^\/api/, "");
+    const search = url.search || "";
+    const targetUrl = `https://${target}${path}${search}`;
 
-    const _0xmeth = _0x5a["\x6d\x65\x74\x68\x6f\x64"];
-    return await fetch(_0xend, {
-      method: _0xmeth,
-      headers: _0xheaders,
-      body: !["\x47\x45\x54", "\x48\x45\x41\x44"]["\x69\x6e\x63\x6c\x75\x64\x65\x73"](_0xmeth) ? _0x5a["\x62\x6f\x64\x79"] : undefined,
-      duplex: _0x5501(8),
-      redirect: _0x5501(7)
+    const headers = new Headers();
+    req.headers.forEach((value, key) => {
+      if (key.toLowerCase() === "host") return;
+      headers.set(key, value);
     });
-  } catch (_0xerr) {
-    return new Response(null, { status
+
+    const response = await fetch(targetUrl, {
+      method: req.method,
+      headers,
+      body: ["GET", "HEAD"].includes(req.method) ? null : req.body,
+      redirect: "manual",
+    });
+
+    return response;
+  } catch (err) {
+    return new Response(null, { status: 500 });
+  }
+}
